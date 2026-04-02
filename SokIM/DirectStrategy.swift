@@ -24,6 +24,7 @@ struct DirectStrategy: Strategy {
 
         // 그 사이에 이전 조합이 달라진 경우
         if prevString != composing {
+            debug("조합 추적 실패: '\(prevString)' != '\(composing)'")
             // OS가 추가 처리함
             debug("return false")
             return false
@@ -53,11 +54,10 @@ struct DirectStrategy: Strategy {
         let prevString = sender.string(from: prevRange, actualRange: &prevRange) ?? ""
         prevRange = range(selected, composing, includeBlock: true) // "조합||커서||블록"
 
-        // 그 사이에 이전 조합이 달라진 경우
+        // 그 사이에 이전 조합이 달라진 경우 — 이전 조합 포기, 커서 위치에서 새로 시작
         if prevString != composing {
-            // 입력 실패
-            debug("return false")
-            return false
+            debug("조합 추적 실패, 새로 시작: '\(prevString)' != '\(composing)'")
+            prevRange = NSRange(location: selected.location, length: selected.length)
         }
 
         // composed -> insertText
