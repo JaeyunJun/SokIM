@@ -8,9 +8,9 @@ import Foundation
 func debug(_ message: String = "",
            fileID: String = #fileID,
            function: String = #function) {
-    if Preferences.debug {
-        Logger().debug("\(fileID, privacy: .public): \(function, privacy: .public) \(message, privacy: .public)")
-    }
+    #if DEBUG
+    Logger().debug("\(fileID, privacy: .public): \(function, privacy: .public) \(message, privacy: .public)")
+    #endif
 }
 
 func notice(_ message: String = "",
@@ -146,103 +146,3 @@ func getMappedModifierUsage(_ usage: UInt32, _ device: IOHIDDevice) -> UInt32 {
     return usage
 }
 
-// MARK: - 물리 키보드 Caps Lock 상태
-
-private var state: Bool = false
-private var block1 = DispatchWorkItem { }
-private var block2 = DispatchWorkItem { }
-
-private let initHID = {
-    let hid = IOHIDManagerCreate(kCFAllocatorDefault, 0)
-    IOHIDManagerSetDeviceMatching(hid, [
-        kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop, // Generic Desktop Page (0x01)
-        kIOHIDDeviceUsageKey: kHIDUsage_GD_Keyboard        // Keyboard (0x06, Collection Application)
-    ] as CFDictionary)
-
-    if IOHIDManagerOpen(hid, 0) != kIOReturnSuccess {
-        warning("IOHIDManagerOpen 실패")
-        return nil as IOHIDManager?
-    }
-
-    return hid
-}
-private var hid = initHID()
-
-func setKeyboardCapsLock(enabled: Bool) {
-    debug("enabled: \(enabled) (state: \(state))")
-
-    /** HIS_XPC: Caps Lock 상태는 늘 false */
-    block1.cancel()
-    block1 = DispatchWorkItem {
-        debug("HIS_XPC_SetCapsLockModifierState")
-        HIS_XPC_SetCapsLockModifierState(false)
-    }
-
-    /** HIS_XPC: Sonoma 이후 커서 밑에 생기는 "버블"/HUD/Indicator/Accessory 방지 */
-    for delay in stride(from: 0, to: 200, by: 20) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(delay), execute: block1)
-    }
-
-    block2.cancel()
-    block2 = DispatchWorkItem {
-        /** HID: 키보드 찾기 */
-        if hid == nil { hid = initHID() }
-        guard let hid,
-              let devs = IOHIDManagerCopyDevices(hid) as? Set<IOHIDDevice> else {
-            warning("IOHIDManagerCopyDevices 실패")
-            return
-        }
-
-        for dev in devs {
-            /** HID: Caps Lock 상태는 늘 false */
-            let serv = IOHIDDeviceGetService(dev)
-            var conn: io_connect_t = 0
-
-            guard IOServiceOpen(serv, mach_task_self_, UInt32(kIOHIDParamConnectType), &conn) == KERN_SUCCESS else {
-                warning("IOServiceOpen 실패: \(serv)")
-                continue
-            }
-            defer {
-                IOServiceClose(conn)
-                IOConnectRelease(conn)
-            }
-
-            guard IOHIDSetModifierLockState(conn, Int32(kIOHIDCapsLockState), false) == KERN_SUCCESS else {
-                warning("IOHIDSetModifierLockState 실패: \(conn)")
-                continue
-            }
-
-            debug("IOHIDSetModifierLockState 성공: \(dev)")
-
-            /** HID: Caps Lock LED */
-            guard let elems = IOHIDDeviceCopyMatchingElements(dev, [
-                kIOHIDElementUsagePageKey: kHIDPage_LEDs,     // LED Page (0x08)
-                kIOHIDElementUsageKey: kHIDUsage_LED_CapsLock // Caps Lock (0x02)
-            ] as CFDictionary, 0) as? [IOHIDElement] else {
-                warning("IOHIDDeviceCopyMatchingElements 실패: \(dev)")
-                continue
-            }
-
-            let time = mach_absolute_time()
-            for elem in elems {
-                let val = IOHIDValueCreateWithIntegerValue(kCFAllocatorDefault, elem, time, enabled ? 1 : 0)
-                guard IOHIDDeviceSetValue(dev, elem, val) == kIOReturnSuccess else {
-                    warning("IOHIDDeviceSetValue 실패: \(elem)")
-                    continue
-                }
-            }
-
-            debug("IOHIDDeviceSetValue 성공: \(dev)")
-        }
-    }
-    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100), execute: block2)
-    DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300), execute: block2)
-
-    state = enabled
-}
-
-func getKeyboardCapsLock() -> Bool {
-    debug("state: \(state)")
-
-    return state
-}

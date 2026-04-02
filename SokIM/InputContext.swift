@@ -24,8 +24,8 @@ struct InputContext {
 
         // keyDown만 보고 판단, 단축키 조합(예: Cmd+X)은 같은 context로 묶음
         if type == .keyDown {
-            // QwertyEngine에서 지원하는 글쇠면 카운트 증가 안 함
-            if QwertyEngine.usageToTupleMap[usage] != nil { }
+            // TwoSetEngine에서 지원하는 글쇠면 카운트 증가 안 함
+            if TwoSetEngine.usageToTupleMap[usage] != nil { }
             // Option인 경우 카운트 증가 안 함
             else if usage == ModifierUsage.leftOption.rawValue || usage == ModifierUsage.rightOption.rawValue { }
             // Shift인 경우 카운트 증가 안 함

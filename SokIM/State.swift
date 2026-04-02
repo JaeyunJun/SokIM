@@ -15,12 +15,6 @@ struct State: CustomStringConvertible {
     /** Input 처리에서 도출된 Caps Lock 키 활성화 상태 */
     private var isCapsLockOn = false
 
-    /** 한/A 전환이 Caps Lock인 경우 Caps Lock이 활성화/비활성화 되는 과정에서 한/A 전환이 진행될 수 있는지 여부를 판단하는 플래그 (InputMonitor와 유사) */
-    private var canCapsLockRotate = true
-
-    /** 마지막으로 keyDown이었던 Caps Lock Input */
-    private var lastCapsLockDownInput: Input?
-
     /** 현재 눌려있는 Input, 반복 입력 시 사용 */
     private(set) var down: Input?
 
@@ -34,58 +28,9 @@ struct State: CustomStringConvertible {
         if let key = ModifierUsage(rawValue: usage) {
             modifier[key] = type
 
-            // 오른쪽 Command: 한/A 전환 *실제 처리*
-            if (type, key) == (.keyDown, .rightCommand)
-                && Preferences.rotateShortcuts.contains(.rightCommand) {
-                rotate()
-            }
-
-            // 오른쪽 Option: 한/A 전환 *실제 처리*
-            if (type, key) == (.keyDown, .rightOption)
-                && Preferences.rotateShortcuts.contains(.rightOption) {
-                rotate()
-            }
-
-            // Caps Lock: 한/A 상태 및 LED *실제 처리*
+            // Caps Lock: 일반 반전 처리
             if (type, key) == (.keyDown, .capsLock) {
-                // 한/A 전환이 Caps Lock인 경우 처리
-                if Preferences.rotateShortcuts.contains(.capsLock) {
-                    // Caps Lock 활성 -> 비활성: 한/A 전환 1회 억제
-                    if isCapsLockOn {
-                        canCapsLockRotate = false
-                    }
-
-                    // Caps Lock 비활성화
-                    isCapsLockOn = false
-                    lastCapsLockDownInput = input
-
-                    // 한/A 전환
-                    if canCapsLockRotate {
-                        rotate()
-                    } else {
-                        canCapsLockRotate = true
-                    }
-                }
-                // 그 외의 경우 일반 반전 처리
-                else {
-                    isCapsLockOn.toggle()
-                }
-            }
-
-            // Caps Lock: Caps Lock *실제 처리*
-            if (type, key) == (.keyUp, .capsLock)
-                && Preferences.rotateShortcuts.contains(.capsLock) {
-                // 마지막으로 keyDown된 Caps Lock Input의 timestamp가 800ms 이상 차이 나면 Caps Lock 활성화
-                if let down = lastCapsLockDownInput,
-                    ms(absolute: input.timestamp) - ms(absolute: down.timestamp) > 800 {
-                    // Caps Lock 비활성 -> 활성: 한/A 전환 1회 억제
-                    canCapsLockRotate = false
-
-                    // Caps Lock 활성화
-                    isCapsLockOn = true
-                    lastCapsLockDownInput = nil
-                    engine = engines.A
-                }
+                isCapsLockOn.toggle()
             }
         }
         // 그 외 경우 중 keyDown인 경우
@@ -99,25 +44,6 @@ struct State: CustomStringConvertible {
             let isOptionDown = modifier[.leftOption] == .keyDown || modifier[.rightOption] == .keyDown
             let isControlDown = modifier[.leftControl] == .keyDown || modifier[.rightControl] == .keyDown
 
-            // Command/Shift/Control + Space: keyDown인 경우 한/A 전환 // TODO: #15
-            if (
-                isCommandDown
-                && usage == SpecialUsage.space.rawValue
-                && Preferences.rotateShortcuts.contains(.commandSpace)
-            ) || (
-                isShiftDown
-                && usage == SpecialUsage.space.rawValue
-                && Preferences.rotateShortcuts.contains(.shiftSpace)
-            ) || (
-                isControlDown
-                && usage == SpecialUsage.space.rawValue
-                && Preferences.rotateShortcuts.contains(.controlSpace)
-            ) {
-                rotate()
-
-                return
-            }
-
             // Control, Command: keyDown 상태인 경우 키 무시
             if isControlDown || isCommandDown {
                 debug("Input ignored: \(input) \(modifier)")
@@ -126,12 +52,7 @@ struct State: CustomStringConvertible {
             }
 
             // engine으로 현재 input을 tuple로 변환 가능하면
-            if var tuple = engine.usageToTuple(usage, isOptionDown, isShiftDown, isCapsLockOn) {
-                // "₩ 대신 ` 입력" 처리
-                if tuple.char == "₩" && Preferences.graveOverWon {
-                    tuple.char = "`"
-                }
-
+            if let tuple = engine.usageToTuple(usage, isOptionDown, isShiftDown, isCapsLockOn) {
                 // 입력 진행
                 next(tuple)
             }
@@ -155,22 +76,7 @@ struct State: CustomStringConvertible {
 
     // MARK: - KeyboardEngine
 
-    var engine: Engine.Type = TwoSetEngine.self
-    init(engine: Engine.Type) {
-        debug("\(engine)")
-
-        self.engine = engine
-    }
-    let engines = (한: TwoSetEngine.self, A: QwertyEngine.self) // TODO: #24
-
-    /** 사용 가능한 다음 engine으로 변경 */
-    mutating func rotate() {
-        debug()
-
-        engine = engine == engines.한 ? engines.A : engines.한
-
-        appDelegate()?.statusBar.setEngine(engine)
-    }
+    let engine: Engine.Type = TwoSetEngine.self
 
     // MARK: - CharTuple
 

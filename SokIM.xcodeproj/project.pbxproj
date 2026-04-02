@@ -18,13 +18,10 @@
 		DF9286D026F5CFB000002080 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DF9286CF26F5CFB000002080 /* Assets.xcassets */; };
 		DF9286D326F5CFB000002080 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = DF9286D126F5CFB000002080 /* MainMenu.xib */; };
 		DF971F5C2D2AE95300CECF3D /* ClickMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF971F5B2D2AE95000CECF3D /* ClickMonitor.swift */; };
-		DF971F5E2D2BD4D900CECF3D /* HotKeyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF971F5D2D2BD4CF00CECF3D /* HotKeyMonitor.swift */; };
+		DFAA00022026040200000001 /* KeyMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFAA00012026040200000001 /* KeyMonitor.swift */; };
 		DF98FCF12D21B27A0058850E /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = DF98FCF02D21B26E0058850E /* .swiftlint.yml */; };
 		DFAC075B28F80B0200B7A1EC /* InputContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFAC075A28F80B0200B7A1EC /* InputContext.swift */; };
-		DFB825D727F6B25700F31B72 /* QwertyEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB825D627F6B25700F31B72 /* QwertyEngine.swift */; };
 		DFB825D927F7386000F31B72 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB825D827F7386000F31B72 /* State.swift */; };
-		DFC20DAD28CEF725006A8EC2 /* StatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFC20DAC28CEF725006A8EC2 /* StatusBar.swift */; };
-		DFC20DAF28CEFD73006A8EC2 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFC20DAE28CEFD73006A8EC2 /* Preferences.swift */; };
 		DFD8998627F59E3B00C9B8CE /* Engine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFD8998527F59E3B00C9B8CE /* Engine.swift */; };
 		DFEB9DD827F49EFB007D978A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFEB9DD627F49EFB007D978A /* InfoPlist.strings */; };
 		DFFFD8B0280FE99B007B6470 /* icon.tiff in Resources */ = {isa = PBXBuildFile; fileRef = DFFFD8AF280FE99B007B6470 /* icon.tiff */; };
@@ -39,7 +36,6 @@
 		DF7A3048289F96970003BFA6 /* InputMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InputMonitor.swift; sourceTree = "<group>"; };
 		DF7A949D27F44C05005E3783 /* Controller.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Controller.swift; sourceTree = "<group>"; };
 		DF7A949F27F470E7005E3783 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
-		DF7DA4F12D7BA98C0004E154 /* HIServices.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HIServices.h; sourceTree = "<group>"; };
 		DF91AB7F281125C50017664C /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DF9286CA26F5CFAE00002080 /* SokIM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SokIM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF9286CD26F5CFAE00002080 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -47,13 +43,10 @@
 		DF9286D426F5CFB000002080 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DF9286D526F5CFB000002080 /* SokIM.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SokIM.entitlements; sourceTree = "<group>"; };
 		DF971F5B2D2AE95000CECF3D /* ClickMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClickMonitor.swift; sourceTree = "<group>"; };
-		DF971F5D2D2BD4CF00CECF3D /* HotKeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotKeyMonitor.swift; sourceTree = "<group>"; };
+		DFAA00012026040200000001 /* KeyMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMonitor.swift; sourceTree = "<group>"; };
 		DF98FCF02D21B26E0058850E /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		DFAC075A28F80B0200B7A1EC /* InputContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputContext.swift; sourceTree = "<group>"; };
-		DFB825D627F6B25700F31B72 /* QwertyEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QwertyEngine.swift; sourceTree = "<group>"; };
 		DFB825D827F7386000F31B72 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
-		DFC20DAC28CEF725006A8EC2 /* StatusBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBar.swift; sourceTree = "<group>"; };
-		DFC20DAE28CEFD73006A8EC2 /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		DFD8998527F59E3B00C9B8CE /* Engine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Engine.swift; sourceTree = "<group>"; };
 		DFFFD8AF280FE99B007B6470 /* icon.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = icon.tiff; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -91,21 +84,17 @@
 				DF98FCF02D21B26E0058850E /* .swiftlint.yml */,
 				DF7A949D27F44C05005E3783 /* Controller.swift */,
 				DF9286CD26F5CFAE00002080 /* AppDelegate.swift */,
-				DFC20DAC28CEF725006A8EC2 /* StatusBar.swift */,
 				DF7A3048289F96970003BFA6 /* InputMonitor.swift */,
 				DFAC075A28F80B0200B7A1EC /* InputContext.swift */,
 				DF971F5B2D2AE95000CECF3D /* ClickMonitor.swift */,
-				DF971F5D2D2BD4CF00CECF3D /* HotKeyMonitor.swift */,
+				DFAA00012026040200000001 /* KeyMonitor.swift */,
 				DFB825D827F7386000F31B72 /* State.swift */,
 				DF2651CC28328B23001A9317 /* Strategy.swift */,
 				DF2651CD28328B23001A9317 /* DirectStrategy.swift */,
 				DF2651AF28324E8A001A9317 /* MarkedStrategy.swift */,
 				DFD8998527F59E3B00C9B8CE /* Engine.swift */,
-				DFB825D627F6B25700F31B72 /* QwertyEngine.swift */,
 				DF2B53C12802B61D00A64F95 /* TwoSetEngine.swift */,
-				DF7DA4F12D7BA98C0004E154 /* HIServices.h */,
 				DF7A949F27F470E7005E3783 /* Helpers.swift */,
-				DFC20DAE28CEFD73006A8EC2 /* Preferences.swift */,
 				DF9286CF26F5CFB000002080 /* Assets.xcassets */,
 				DF9286D126F5CFB000002080 /* MainMenu.xib */,
 				DF9286D426F5CFB000002080 /* Info.plist */,
@@ -212,19 +201,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				DF7A949E27F44C05005E3783 /* Controller.swift in Sources */,
-				DFB825D727F6B25700F31B72 /* QwertyEngine.swift in Sources */,
+				DFAA00022026040200000001 /* KeyMonitor.swift in Sources */,
 				DFAC075B28F80B0200B7A1EC /* InputContext.swift in Sources */,
 				DF9286CE26F5CFAE00002080 /* AppDelegate.swift in Sources */,
 				DFD8998627F59E3B00C9B8CE /* Engine.swift in Sources */,
 				DF7A3049289F96970003BFA6 /* InputMonitor.swift in Sources */,
 				DF2651B028324E8A001A9317 /* MarkedStrategy.swift in Sources */,
 				DF2B53C22802B61D00A64F95 /* TwoSetEngine.swift in Sources */,
-				DF971F5E2D2BD4D900CECF3D /* HotKeyMonitor.swift in Sources */,
-				DFC20DAF28CEFD73006A8EC2 /* Preferences.swift in Sources */,
 				DF7A94A027F470E7005E3783 /* Helpers.swift in Sources */,
 				DF971F5C2D2AE95300CECF3D /* ClickMonitor.swift in Sources */,
 				DF2651CF28328B23001A9317 /* DirectStrategy.swift in Sources */,
-				DFC20DAD28CEF725006A8EC2 /* StatusBar.swift in Sources */,
 				DFB825D927F7386000F31B72 /* State.swift in Sources */,
 				DF2651CE28328B23001A9317 /* Strategy.swift in Sources */,
 			);
@@ -396,7 +382,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.kiding.inputmethod.sok;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = SokIM/HIServices.h;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -426,7 +411,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.kiding.inputmethod.sok;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SWIFT_OBJC_BRIDGING_HEADER = SokIM/HIServices.h;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

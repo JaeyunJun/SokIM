@@ -1,25 +1,38 @@
-# 속 입력기
+# 속 입력기 (개인 커스텀)
 
-<img src="https://github.com/kiding/SokIM/blob/main/SokIM/Assets.xcassets/AppIcon.appiconset/icon_128x128%402x%402x.png" width="128px">
-<img src="https://github.com/kiding/SokIM/releases/download/v1.2.0/screenshot.png" width="300px">
+[kiding/SokIM](https://github.com/kiding/SokIM) 기반 개인 사용 목적 포크.
 
-빠르고 매끄러운 한영 전환을 위한 새로운 macOS 입력기
+## 원본과의 차이
 
-## 설치 방법
+### 한국어 전용화
+- 영문 엔진(QwertyEngine) 및 한/영 전환 로직 제거
+- 영문 입력은 macOS 기본 입력기(ABC 등)를 사용
+- Caps Lock 이중 용도(짧게=전환, 길게=CapsLock) 제거 — 시스템 기본 동작
+- ABC 억제, 보안 입력 자동 전환 등 전환 관련 기능 일괄 제거
 
-1. [GitHub Releases](https://github.com/kiding/SokIM/releases)에서 `SokIM.pkg` 다운로드 및 설치 또는 `brew install --cask sokim` 실행 
-1. 시스템 설정 → 키보드 → 입력 소스 "편집..." 버튼 → "+" 버튼 → 영어 → "속 입력기" → "추가" 버튼
-1. 메뉴 막대에서 현재 입력기를 속 입력기로 변경
-1. 시스템 설정 → 개인정보 보호 및 보안 → 입력 모니터링에서 "속 입력기" 권한 허용
+### 전역 키 조합 추가
+입력기 상태와 무관하게 시스템 전역으로 동작 (CGEventTap 기반):
 
-## 삭제 방법
+| 조합 | 출력 |
+|------|------|
+| Shift + ESC | `~` |
+| Cmd + ESC | `` ` `` |
+| Cmd + `\` | `₩` |
 
-1. 시스템 설정 → 키보드 → 입력 소스 "편집..." 버튼 → "속 입력기" → "-" 버튼
-1. 로그아웃 후 재로그인
-1. 시스템 설정 → 개인정보 보호 및 보안 → 입력 모니터링 → "속 입력기" → "-" 버튼  
-1. `/Library/Input Methods/SokIM.app` 삭제 또는 `brew uninstall --cask sokim` 실행
+### 제거된 UI/기능
+- 메뉴 막대 상태 표시 및 설정 메뉴
+- 자동 업데이트 확인
+- "₩ 대신 ` 입력" 옵션 (₩ 키는 항상 ₩, 백틱은 Cmd+ESC로 입력)
+- 디버그 모드 토글 (Debug 빌드에서만 자동 로깅)
 
-## 디버그 메시지 보기
+## 빌드
 
-1. 속 입력기 → 디버그 모드 활성화
-1. 터미널에서 `log stream --predicate 'process == "SokIM" AND composedMessage CONTAINS ".swift"' --debug --style compact`
+```bash
+xcodebuild -project SokIM.xcodeproj -scheme SokIM -configuration Release build
+```
+
+빌드 결과물을 `/Library/Input Methods/SokIM.app`에 복사 후 입력 소스에 추가.
+
+## 원본
+
+- [kiding/SokIM](https://github.com/kiding/SokIM) — 빠르고 매끄러운 한영 전환을 위한 macOS 입력기

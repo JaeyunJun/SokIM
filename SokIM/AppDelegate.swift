@@ -1,13 +1,12 @@
 import Cocoa
 import InputMethodKit
-import UserNotifications
 
 func appDelegate() -> AppDelegate? {
     return NSApp.delegate as? AppDelegate
 }
 
 @main
-class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate {
     // swiftlint:disable force_cast
     private var server: IMKServer = IMKServer.init(
         name: (Bundle.main.infoDictionary!["InputMethodConnectionName"] as! String),
@@ -15,10 +14,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     )
     // swiftlint:enable force_cast
 
-    let statusBar = StatusBar()
     let inputMonitor = InputMonitor()
     let clickMonitor = ClickMonitor()
-    let hotKeyMonitor = HotKeyMonitor()
+    let keyMonitor = KeyMonitor()
 
     private var state = State()
     private var sender: IMKTextInput?
@@ -26,29 +24,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         debug()
 
-        startCheckingUpdate()
         startMonitorsInitially()
 
         // 사용자가 입력기를 변경하는 시점에 대부분 버림
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(clearExceptEngine),
-            name: NSTextInputContext.keyboardSelectionDidChangeNotification,
-            object: nil
-        )
-
-        // 입력기가 변경되는 시점에 ABC 입력기 제한 로직 실행
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(suppressABC),
-            name: NSTextInputContext.keyboardSelectionDidChangeNotification,
-            object: nil
-        )
-
-        // 입력기가 변경되는 시점에 보안 입력 상태인 경우 모두 버리고 영문 소문자 입력으로 변경
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(abcOnSecureInput),
+            selector: #selector(clearState),
             name: NSTextInputContext.keyboardSelectionDidChangeNotification,
             object: nil
         )
@@ -73,7 +54,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         stopMonitors()
 
-        // applicationDidFinishLaunching에서 추가한 observer 제거
         NotificationCenter.default.removeObserver(
             self,
             name: NSTextInputContext.keyboardSelectionDidChangeNotification,
@@ -93,93 +73,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         )
     }
 
-    private func startCheckingUpdate() {
-        debug()
-
-        let center = UNUserNotificationCenter.current()
-        center.delegate = self
-
-        Task {
-            _ = try? await center.requestAuthorization(options: [.alert, .sound])
-            var deliveredName = ""
-
-            while true {
-                debug()
-
-                let config = URLSessionConfiguration.ephemeral
-                config.timeoutIntervalForResource = 15
-                let url = URL(string: "https://api.github.com/repos/kiding/SokIM/releases/latest")!
-                guard let data = try? await URLSession(configuration: config).data(from: url).0 else {
-                    warning("요청 실패: \(url)")
-                    return
-                }
-
-                guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let name = json["name"] as? String else {
-                    warning("릴리스 이름 파싱 실패")
-                    return
-                }
-
-                guard let latestString = name.wholeMatch(of: /v[\d.]+ \((\d+)\)/)?.1,
-                      let latest = Int(latestString) else {
-                    warning("알 수 없는 릴리스 이름: \(name)")
-                    return
-                }
-
-                guard let currentString = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String,
-                      let current = Int(currentString) else {
-                    warning("CFBundleVersion 없거나 숫자가 아님")
-                    return
-                }
-
-                debug("current: \(current), latest: \(latest)")
-                if current < latest {
-                    await MainActor.run {
-                        statusBar.setStatus("📥")
-                        statusBar.setNotice("📥 새로운 업데이트가 있습니다.")
-                    }
-
-                    if deliveredName != name {
-                        deliveredName = name
-
-                        let content = UNMutableNotificationContent()
-                        content.title = "속 입력기"
-                        content.body = "\(name) 업데이트가 있습니다."
-                        let request = UNNotificationRequest(identifier: name, content: content, trigger: nil)
-                        _ = try? await center.add(request)
-                    }
-                }
-
-                _ = try? await Task.sleep(for: .seconds(86400 * 2))
-            }
-        }
-    }
-
-    internal func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse
-    ) async {
-        debug()
-
-        statusBar.checkUpdate(sender: nil)
-    }
-
     private func startMonitorsInitially() {
         debug()
 
         do {
             try inputMonitor.start()
             try clickMonitor.start()
-            try hotKeyMonitor.start()
-            statusBar.setStatus(state.engine.name)
-            statusBar.setError(nil)
+            try keyMonitor.start()
         } catch {
             warning("\(error)")
             inputMonitor.stop()
             clickMonitor.stop()
-            hotKeyMonitor.stop()
-            statusBar.setStatus("⚠️")
-            statusBar.setError("⚠️ \(error)")
+            keyMonitor.stop()
             DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: startMonitorsInitially)
         }
     }
@@ -192,17 +97,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             try inputMonitor.start()
             clickMonitor.stop()
             try clickMonitor.start()
-            hotKeyMonitor.stop()
-            try hotKeyMonitor.start()
-            statusBar.setStatus(state.engine.name)
-            statusBar.setError(nil)
+            keyMonitor.stop()
+            try keyMonitor.start()
         } catch {
             warning("\(error)")
             inputMonitor.stop()
             clickMonitor.stop()
-            hotKeyMonitor.stop()
-            statusBar.setStatus("⚠️")
-            statusBar.setError("⚠️ \(error)")
+            keyMonitor.stop()
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { self.restartMonitors(nil) }
         }
     }
@@ -212,7 +113,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 
         inputMonitor.stop()
         clickMonitor.stop()
-        hotKeyMonitor.stop()
+        keyMonitor.stop()
     }
 
     override func handle(_ event: NSEvent!, client sender: Any!) -> Bool {
@@ -226,6 +127,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         }
         self.sender = sender
         let strategy = strategy(for: sender)
+
+        // 별도 처리: KeyMonitor가 생성한 합성 이벤트인 경우 문자 직접 입력
+        if let cgEvent = event.cgEvent,
+           cgEvent.getIntegerValueField(.eventSourceUserData) == KeyMonitor.syntheticMarker {
+            sender.insertText(event.characters ?? "", replacementRange: defaultRange)
+            inputMonitor.flush()
+            return true
+        }
 
         // 별도 처리: 암호 필드에 포커스된 경우 OS가 대신 처리
         if IsSecureEventInputEnabled() {
@@ -388,72 +297,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         inputs = inputs.indices.filter { flags[$0] }.map { inputs[$0] }
     }
 
-    /** engine 선택 외 모든 상태 버림 */
-    @objc func clearExceptEngine(_ aNotification: Notification?) {
+    /** 모든 상태 버림 */
+    @objc func clearState(_ aNotification: Notification?) {
         debug("\(String(describing: aNotification))")
 
         inputMonitor.flush()
-        state = State(engine: state.engine)
+        state = State()
         sender = nil
         InputContext.commit()
-        setKeyboardCapsLock(enabled: false)
-    }
-
-    /** 암호 입력 필드를 위한 ABC 입력기 제한 기능 */
-    @objc private func suppressABC(_ aNotification: Notification) {
-        debug("\(String(describing: aNotification))")
-
-        guard Preferences.suppressABC == true else { return }
-
-        guard let current = TISCopyCurrentKeyboardInputSource()?.takeRetainedValue() else {
-            warning("TISCopyCurrentKeyboardInputSource 실패")
-            return
-        }
-
-        guard let currentIDOpaque = TISGetInputSourceProperty(current, kTISPropertyInputSourceID) else {
-            warning("TISGetInputSourceProperty 실패")
-            return
-        }
-        let currentID = Unmanaged<CFString>.fromOpaque(currentIDOpaque).takeUnretainedValue() as String
-
-        guard currentID == "com.apple.keylayout.ABC" || currentID == "com.apple.keylayout.US" else {
-            debug("현재 입력기 ABC 아님: \(currentID)")
-            return
-        }
-
-        guard let sokArray = TISCreateInputSourceList([
-            kTISPropertyInputSourceType: kTISTypeKeyboardInputMode,
-            kTISPropertyInputModeID: "com.kiding.inputmethod.sok.mode" as CFString
-        ] as CFDictionary, false)?.takeRetainedValue() as? [TISInputSource] else {
-            warning("TISCreateInputSourceList 실패")
-            return
-        }
-
-        guard let sok = sokArray.first else {
-            warning("sokArray.first 실패")
-            return
-        }
-
-        // "시스템 설정 > 암호" 필드에서는 무한 루프에 빠질 수 있음
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
-            guard TISSelectInputSource(sok) == 0 else {
-                warning("TISSelectInputSource 실패")
-                return
-            }
-
-            debug("ABC 입력기 제한 성공")
-        }
-    }
-
-    @objc private func abcOnSecureInput(_ aNotification: Notification) {
-        debug("\(String(describing: aNotification))")
-
-        guard IsSecureEventInputEnabled() else { return }
-
-        clearExceptEngine(nil)
-        state.engine = state.engines.A
-        statusBar.setEngine(state.engines.A)
-
-        debug("abcOnSecureInput 성공")
     }
 }
