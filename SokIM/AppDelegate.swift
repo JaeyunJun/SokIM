@@ -155,6 +155,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         defer { debug("이후 state: \(state)") }
         let oldState = state
 
+        // modifier 상태 동기화 (HID keyUp 누락으로 인한 stuck 방지)
+        state.syncModifiers(with: event.modifierFlags)
+
         // inputs 입력, 반복 입력인 경우 down 한번 더 입력
         inputs.forEach { state.next($0) }
         if event.isARepeat, let down = state.down { state.next(down) }

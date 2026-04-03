@@ -74,6 +74,26 @@ struct State: CustomStringConvertible {
         }
     }
 
+    /** NSEvent의 modifier 상태로 동기화 (HID keyUp 누락 복구) */
+    mutating func syncModifiers(with flags: NSEvent.ModifierFlags) {
+        if !flags.contains(.option) {
+            modifier[.leftOption] = nil
+            modifier[.rightOption] = nil
+        }
+        if !flags.contains(.shift) {
+            modifier[.leftShift] = nil
+            modifier[.rightShift] = nil
+        }
+        if !flags.contains(.control) {
+            modifier[.leftControl] = nil
+            modifier[.rightControl] = nil
+        }
+        if !flags.contains(.command) {
+            modifier[.leftCommand] = nil
+            modifier[.rightCommand] = nil
+        }
+    }
+
     // MARK: - KeyboardEngine
 
     let engine: Engine.Type = TwoSetEngine.self
