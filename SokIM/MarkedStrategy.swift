@@ -52,6 +52,9 @@ struct MarkedStrategy: Strategy {
             sender.insertText(state.composed, replacementRange: defaultRange)
         }
 
-        // composing: setMarkedText로 이미 표시되어 있으므로 OS가 확정하도록 맡김
+        // composing -> insertText
+        if state.composing.count > 0 {
+            sender.insertText(state.composing, replacementRange: defaultRange)
+        }
     }
 }
