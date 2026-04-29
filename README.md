@@ -25,6 +25,19 @@
 - "₩ 대신 ` 입력" 옵션 (₩ 키는 항상 ₩, 백틱은 Cmd+ESC로 입력)
 - 디버그 모드 토글 (Debug 빌드에서만 자동 로깅)
 
+### 앱별 commit 처리 방식 토글
+일부 앱(특히 Electron 기반 — Notion Calendar, Slack 등)에서 한글 입력 중
+다른 필드 클릭 시 마지막 글자가 이중 입력되는 문제 대응.
+
+입력 소스 메뉴(메뉴바 입력기 아이콘)에서 현재 frontmost 앱에 대해 두 가지
+중 하나를 선택할 수 있다:
+
+- **기본**: NavilIME와 동일한 IMK 표준 방식. `insertText(composed+composing, defaultRange)` 한 번 호출로 marked text를 commit text로 교체. IMK 계약을 정상 구현한 앱(대부분의 네이티브 앱)에선 매끄럽게 동작.
+- **수정**: cursor 위치에서 composing 길이만큼 역산한 명시적 `replacementRange`로 영역을 직접 덮어쓰기. OS의 marked text 자동 확정 동작과 무관하게 멱등. Electron처럼 IMK의 `defaultRange` 의미를 무시하는 앱에서 이중 입력을 우회. 단 앱의 `selectedRange()` 신뢰도가 낮으면 의도와 다른 위치를 덮어쓸 위험.
+
+설정은 in-process UserDefaults에 즉시 저장·반영(재시작 불필요).
+샌드박스 환경이라 plist는 `~/Library/Containers/com.kiding.inputmethod.sok/Data/Library/Preferences/`에 저장됨.
+
 ## 빌드
 
 ```bash

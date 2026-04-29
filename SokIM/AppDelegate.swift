@@ -21,8 +21,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var state = State()
     private var sender: IMKTextInput?
 
+    /** 메뉴에서 자동 감지 결과 미리보기에 사용 */
+    func currentSender() -> IMKTextInput? { sender }
+
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         debug()
+
+        setupStrategyCache()
 
         startMonitorsInitially()
 

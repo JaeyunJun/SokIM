@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DF2651B028324E8A001A9317 /* MarkedStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2651AF28324E8A001A9317 /* MarkedStrategy.swift */; };
+		FA0000B028324E8A001A9317 /* FixedMarkedStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0000AF28324E8A001A9317 /* FixedMarkedStrategy.swift */; };
 		DF2651CE28328B23001A9317 /* Strategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2651CC28328B23001A9317 /* Strategy.swift */; };
 		DF2651CF28328B23001A9317 /* DirectStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2651CD28328B23001A9317 /* DirectStrategy.swift */; };
 		DF2B53C22802B61D00A64F95 /* TwoSetEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF2B53C12802B61D00A64F95 /* TwoSetEngine.swift */; };
@@ -30,6 +31,7 @@
 /* Begin PBXFileReference section */
 		DF1D7D1229EBF9BB00A2302F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		DF2651AF28324E8A001A9317 /* MarkedStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkedStrategy.swift; sourceTree = "<group>"; };
+		FA0000AF28324E8A001A9317 /* FixedMarkedStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixedMarkedStrategy.swift; sourceTree = "<group>"; };
 		DF2651CC28328B23001A9317 /* Strategy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Strategy.swift; sourceTree = "<group>"; };
 		DF2651CD28328B23001A9317 /* DirectStrategy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DirectStrategy.swift; sourceTree = "<group>"; };
 		DF2B53C12802B61D00A64F95 /* TwoSetEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TwoSetEngine.swift; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 				DF2651CC28328B23001A9317 /* Strategy.swift */,
 				DF2651CD28328B23001A9317 /* DirectStrategy.swift */,
 				DF2651AF28324E8A001A9317 /* MarkedStrategy.swift */,
+				FA0000AF28324E8A001A9317 /* FixedMarkedStrategy.swift */,
 				DFD8998527F59E3B00C9B8CE /* Engine.swift */,
 				DF2B53C12802B61D00A64F95 /* TwoSetEngine.swift */,
 				DF7A949F27F470E7005E3783 /* Helpers.swift */,
@@ -207,6 +210,7 @@
 				DFD8998627F59E3B00C9B8CE /* Engine.swift in Sources */,
 				DF7A3049289F96970003BFA6 /* InputMonitor.swift in Sources */,
 				DF2651B028324E8A001A9317 /* MarkedStrategy.swift in Sources */,
+				FA0000B028324E8A001A9317 /* FixedMarkedStrategy.swift in Sources */,
 				DF2B53C22802B61D00A64F95 /* TwoSetEngine.swift in Sources */,
 				DF7A94A027F470E7005E3783 /* Helpers.swift in Sources */,
 				DF971F5C2D2AE95300CECF3D /* ClickMonitor.swift in Sources */,

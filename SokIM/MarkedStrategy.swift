@@ -47,14 +47,11 @@ struct MarkedStrategy: Strategy {
     static func commit(from state: State, to sender: IMKTextInput) {
         debug("\(state)")
 
-        // composed -> insertText
-        if state.composed.count > 0 {
-            sender.insertText(state.composed, replacementRange: defaultRange)
-        }
-
-        // composing -> insertText
-        if state.composing.count > 0 {
-            sender.insertText(state.composing, replacementRange: defaultRange)
+        // NavilIME 방식: composed + composing을 합쳐 단일 insertText 호출.
+        // defaultRange가 IMK 표준에서 "marked 영역 교체"를 의미하므로 한 번이면 충분.
+        let combined = state.composed + state.composing
+        if combined.count > 0 {
+            sender.insertText(combined, replacementRange: defaultRange)
         }
     }
 }

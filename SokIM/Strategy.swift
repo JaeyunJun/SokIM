@@ -1,6 +1,43 @@
 import InputMethodKit
 
 /**
+ "이중 입력 수정" 화이트리스트.
+ - 이 목록에 있는 번들 ID는 MarkedStrategy 대신 FixedMarkedStrategy를 사용.
+ - 자동 감지 결과가 DirectStrategy면 이 목록과 무관하게 Direct 사용(이슈 무관).
+ - 입력기 메뉴(`Controller.menu()`)에서 토글하거나 `defaults write com.kiding.inputmethod.sok useFixedMarkedBundleIDs -array <id> ...`.
+ - 키가 미설정이면 빈 배열(빌드 직후 = 모든 앱이 기본 동작).
+ */
+let useFixedMarkedKey = "useFixedMarkedBundleIDs"
+
+let defaultUseFixedMarked: [String] = []
+
+/**
+ hot path(`strategy(for:)`)에서 매번 UserDefaults를 읽지 않도록 메모리에 캐시.
+ 변경은 동일 프로세스 내(IME 메뉴)에서 일어나므로 `UserDefaults.didChangeNotification`만으로 즉시 반영됨.
+ */
+private var cachedUseFixedMarked: [String] = defaultUseFixedMarked
+
+private func reloadStrategyCache() {
+    let defaults = UserDefaults.standard
+    cachedUseFixedMarked = defaults.stringArray(forKey: useFixedMarkedKey) ?? defaultUseFixedMarked
+    debug("useFixedMarked: \(cachedUseFixedMarked)")
+}
+
+func setupStrategyCache() {
+    reloadStrategyCache()
+    NotificationCenter.default.addObserver(
+        forName: UserDefaults.didChangeNotification,
+        object: nil,
+        queue: .main
+    ) { _ in
+        reloadStrategyCache()
+    }
+}
+
+/** 메뉴에서 사용 */
+func currentUseFixedMarkedList() -> [String] { cachedUseFixedMarked }
+
+/**
  입력 방식 선택
 
  # `sender.validAttributesForMarkedText()`
@@ -40,14 +77,8 @@ import InputMethodKit
  | Slack | ... NSMarkedClauseSegment ... |
  | Excel | ... |
  */
-func strategy(for sender: IMKTextInput) -> Strategy.Type {
-    debug()
-    if let bundleIdentifier = sender.bundleIdentifier(),
-       bundleIdentifier == "com.apple.Numbers"
-        || bundleIdentifier.hasPrefix("com.hancom.office.hwp") {
-        return MarkedStrategy.self
-    }
-
+/** sender의 `validAttributesForMarkedText()`만 보고 결정하는 자동 감지(강제 오버라이드 미적용). 메뉴에서 미리보기로도 사용. */
+func autoDetectStrategy(for sender: IMKTextInput) -> Strategy.Type {
     let attributes = sender.validAttributesForMarkedText() as? [String] ?? []
     debug("validAttributesForMarkedText: \(attributes)")
 
@@ -58,6 +89,25 @@ func strategy(for sender: IMKTextInput) -> Strategy.Type {
     } else {
         return MarkedStrategy.self
     }
+}
+
+func strategy(for sender: IMKTextInput) -> Strategy.Type {
+    debug()
+
+    let auto = autoDetectStrategy(for: sender)
+
+    // Direct 자동 감지 결과면 그대로 사용 (이중 입력 이슈 무관)
+    if auto == DirectStrategy.self {
+        return DirectStrategy.self
+    }
+
+    // Marked인데 화이트리스트에 있으면 FixedMarkedStrategy로 교체
+    if let bundleIdentifier = sender.bundleIdentifier(),
+       cachedUseFixedMarked.contains(bundleIdentifier) {
+        return FixedMarkedStrategy.self
+    }
+
+    return MarkedStrategy.self
 }
 
 /** 입력 방식 */
